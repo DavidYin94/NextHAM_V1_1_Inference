@@ -1,6 +1,6 @@
 # NextHAM: Inference Pipeline
 
-This repository is a lightweight inference branch for the paper **[[ICLR 2026] NextHAM: Advancing Universal Deep Learning for Electronic-Structure Hamiltonian Prediction of Materials]**.
+This repository is a lightweight inference branch for the paper **[ICLR 2026] NextHAM: Advancing Universal Deep Learning for Electronic-Structure Hamiltonian Prediction of Materials**.
 
 Unlike the [main branch](https://github.com/DavidYin94/NextHAM) (which includes full training, testing, and ground-truth accuracy comparisons), this branch focuses strictly on the **inference pipeline**. It is heavily simplified, runs much faster, and is specifically designed for predicting the Hamiltonian of new material structures.
 
