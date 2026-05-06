@@ -12,19 +12,11 @@ The environment dependencies are identical to the main repository. Please refer 
 
 We provide a comprehensive example script, `full_inference_pipeline.sh`, to demonstrate the complete workflow. 
 
-### 0.1 Pre-requisite: Generate Zeroth-Step Hamiltonian
+### 0 Pre-requisite: Generate Zeroth-Step Hamiltonian
 Before running the pipeline, you need to generate the zeroth-step Hamiltonian using the `get_hs` code.
 - **Source Code**: [abacus-develop/largescale](https://github.com/goodchong/abacus-develop/tree/largescale)
 - Compile and run this code on your target material samples. In our examples, we use an 8-atom Si system whose outputs are saved in `get_hs_res/8-atom/`.
 
----
-
-### 0.2 Pre-trained models: Generate Zeroth-Step Hamiltonian
-Before running the pipeline, you need to generate the zeroth-step Hamiltonian using the `get_hs` code.
-- **Source Code**: [abacus-develop/largescale](https://github.com/goodchong/abacus-develop/tree/largescale)
-- Compile and run this code on your target material samples. In our examples, we use an 8-atom Si system whose outputs are saved in `get_hs_res/8-atom/`.
-
----
 
 ### 🏃‍♂️ Pipeline Breakdown
 
