@@ -1,0 +1,22 @@
+ In SCAN_END, can't find: </PP_RELWFC.1> block.
+ In SCAN_END, can't find: </PP_RELWFC.2> block.
+ In SCAN_END, can't find: </PP_RELWFC.3> block.
+ In SCAN_END, can't find: </PP_RELBETA.1> block.
+ In SCAN_END, can't find: </PP_RELBETA.2> block.
+ In SCAN_END, can't find: </PP_RELBETA.3> block.
+ In SCAN_END, can't find: </PP_RELBETA.4> block.
+ In SCAN_END, can't find: </PP_RELBETA.5> block.
+ In SCAN_END, can't find: </PP_RELBETA.6> block.
+ In SCAN_END, can't find: </PP_SPIN_ORB> block.
+ AUTO_SET NBANDS to 52
+ AUTO_SET NBANDS to 52
+                            startmag_type = 1
+                       charge from rho_at = 4
+                         charge should be = 4
+
+ SETUP ATOMIC RHO FOR SPIN 1
+                 Electron number from rho = 32
+           total electron number from rho = 32
+                                should be = 32
+                 charge before normalized = 32
+                  charge after normalized = 32
