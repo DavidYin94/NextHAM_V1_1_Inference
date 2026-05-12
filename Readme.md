@@ -43,12 +43,13 @@ Data parsing and graph generation can be a major bottleneck. To dramatically acc
 
 ---
 
+
 ## 🚀 Quick Start & Usage
 
 ### 0. Pre-requisite: Generate Zeroth-Step Hamiltonian
 Before running the pipeline, you need to generate the zeroth-step Hamiltonian using the `get_hs` code.
 - **Source Code**: [abacus-develop/largescale](https://github.com/goodchong/abacus-develop/tree/largescale)
-- Compile and run this code on your target material samples. In our examples, we use an si Si system whose outputs are saved in `get_hs_res/si/`.
+- Compile and run this code on your target material samples. In our examples, we use a Silicon (Si) system as a sample. You can download the example folder from [here](https://hefei03.nscc-hf.cn:65015/efile/s/w/bmV4dGhhbQ==_7a09882dcb0fe754&) (Extraction code: `bFeV`) and place it in the `get_hs_res/si/` directory.
 
 ---
 
