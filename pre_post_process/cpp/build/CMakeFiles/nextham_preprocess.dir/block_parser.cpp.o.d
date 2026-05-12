@@ -1,7 +1,7 @@
 CMakeFiles/nextham_preprocess.dir/block_parser.cpp.o: \
- /home/zjdai/software/large_scale_inference/NextHAM_V1_1_Inference/pre_post_process/cpp/block_parser.cpp \
+ /your_path/NextHAM_V1_1_Inference/pre_post_process/cpp/block_parser.cpp \
  /usr/include/stdc-predef.h \
- /home/zjdai/software/large_scale_inference/NextHAM_V1_1_Inference/pre_post_process/cpp/block_parser.h \
+ /your_path/NextHAM_V1_1_Inference/pre_post_process/cpp/block_parser.h \
  /usr/include/c++/11/string \
  /usr/include/x86_64-linux-gnu/c++/11/bits/c++config.h \
  /usr/include/x86_64-linux-gnu/c++/11/bits/os_defines.h \
@@ -210,7 +210,7 @@ CMakeFiles/nextham_preprocess.dir/block_parser.cpp.o: \
  /usr/include/c++/11/bits/allocated_ptr.h \
  /usr/include/c++/11/bits/refwrap.h /usr/include/c++/11/bits/fs_dir.h \
  /usr/include/c++/11/bits/fs_ops.h \
- /home/zjdai/software/large_scale_inference/NextHAM_V1_1_Inference/pre_post_process/cpp/csr_parser.h \
+ /your_path/NextHAM_V1_1_Inference/pre_post_process/cpp/csr_parser.h \
  /usr/include/c++/11/fstream \
  /usr/include/x86_64-linux-gnu/c++/11/bits/basic_file.h \
  /usr/include/x86_64-linux-gnu/c++/11/bits/c++io.h \

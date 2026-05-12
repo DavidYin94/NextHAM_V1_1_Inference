@@ -279,7 +279,7 @@ def get_WA_data(WA_data_root):
 
 
 class Material_Project_Dataset(torch.utils.data.Dataset):
-    def __init__(self, mode, construct_kernel, device, dataset_root='/home/zjdai/software/large_scale_inference/NextHAM_V1_1_Inference/datasets/'):
+    def __init__(self, mode, construct_kernel, device, dataset_root='/your_path/NextHAM_V1_1_Inference/datasets/'):
         super().__init__()
         self.mode = mode
         self.construct_kernel = construct_kernel

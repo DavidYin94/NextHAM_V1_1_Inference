@@ -57,10 +57,10 @@ RM = /home/zjdai/software/cmake/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/zjdai/software/large_scale_inference/NextHAM_V1_1_Inference/pre_post_process/cpp
+CMAKE_SOURCE_DIR = /your_path/NextHAM_V1_1_Inference/pre_post_process/cpp
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/zjdai/software/large_scale_inference/NextHAM_V1_1_Inference/pre_post_process/cpp/build
+CMAKE_BINARY_DIR = /your_path/NextHAM_V1_1_Inference/pre_post_process/cpp/build
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -87,9 +87,9 @@ rebuild_cache/fast: rebuild_cache
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/zjdai/software/large_scale_inference/NextHAM_V1_1_Inference/pre_post_process/cpp/build/CMakeFiles /home/zjdai/software/large_scale_inference/NextHAM_V1_1_Inference/pre_post_process/cpp/build//CMakeFiles/progress.marks
+	$(CMAKE_COMMAND) -E cmake_progress_start /your_path/NextHAM_V1_1_Inference/pre_post_process/cpp/build/CMakeFiles /your_path/NextHAM_V1_1_Inference/pre_post_process/cpp/build//CMakeFiles/progress.marks
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/zjdai/software/large_scale_inference/NextHAM_V1_1_Inference/pre_post_process/cpp/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /your_path/NextHAM_V1_1_Inference/pre_post_process/cpp/build/CMakeFiles 0
 .PHONY : all
 
 # The main clean target

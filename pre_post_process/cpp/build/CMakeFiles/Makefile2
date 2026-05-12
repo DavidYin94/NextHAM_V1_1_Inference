@@ -54,10 +54,10 @@ RM = /home/zjdai/software/cmake/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/zjdai/software/large_scale_inference/NextHAM_V1_1_Inference/pre_post_process/cpp
+CMAKE_SOURCE_DIR = /your_path/NextHAM_V1_1_Inference/pre_post_process/cpp
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/zjdai/software/large_scale_inference/NextHAM_V1_1_Inference/pre_post_process/cpp/build
+CMAKE_BINARY_DIR = /your_path/NextHAM_V1_1_Inference/pre_post_process/cpp/build
 
 #=============================================================================
 # Directory level rules for the build root directory
@@ -85,14 +85,14 @@ clean: CMakeFiles/nextham_preprocess.dir/clean
 CMakeFiles/nextham_preprocess.dir/all:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/nextham_preprocess.dir/build.make CMakeFiles/nextham_preprocess.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/nextham_preprocess.dir/build.make CMakeFiles/nextham_preprocess.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/zjdai/software/large_scale_inference/NextHAM_V1_1_Inference/pre_post_process/cpp/build/CMakeFiles --progress-num=1,2,3,4,5,6,7 "Built target nextham_preprocess"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/your_path/NextHAM_V1_1_Inference/pre_post_process/cpp/build/CMakeFiles --progress-num=1,2,3,4,5,6,7 "Built target nextham_preprocess"
 .PHONY : CMakeFiles/nextham_preprocess.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/nextham_preprocess.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/zjdai/software/large_scale_inference/NextHAM_V1_1_Inference/pre_post_process/cpp/build/CMakeFiles 7
+	$(CMAKE_COMMAND) -E cmake_progress_start /your_path/NextHAM_V1_1_Inference/pre_post_process/cpp/build/CMakeFiles 7
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/nextham_preprocess.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/zjdai/software/large_scale_inference/NextHAM_V1_1_Inference/pre_post_process/cpp/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /your_path/NextHAM_V1_1_Inference/pre_post_process/cpp/build/CMakeFiles 0
 .PHONY : CMakeFiles/nextham_preprocess.dir/rule
 
 # Convenience name for target.
@@ -102,7 +102,7 @@ nextham_preprocess: CMakeFiles/nextham_preprocess.dir/rule
 # codegen rule for target.
 CMakeFiles/nextham_preprocess.dir/codegen:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/nextham_preprocess.dir/build.make CMakeFiles/nextham_preprocess.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/zjdai/software/large_scale_inference/NextHAM_V1_1_Inference/pre_post_process/cpp/build/CMakeFiles --progress-num=1,2,3,4,5,6,7 "Finished codegen for target nextham_preprocess"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/your_path/NextHAM_V1_1_Inference/pre_post_process/cpp/build/CMakeFiles --progress-num=1,2,3,4,5,6,7 "Finished codegen for target nextham_preprocess"
 .PHONY : CMakeFiles/nextham_preprocess.dir/codegen
 
 # clean rule for target.

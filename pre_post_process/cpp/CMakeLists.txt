@@ -8,11 +8,11 @@ set(CMAKE_BUILD_TYPE Release)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -march=native -ffast-math")
 
 # Find LibTorch
-set(CMAKE_PREFIX_PATH "/home/zjdai/software/large_scale_inference/NextHAM_V1_1_Inference/pkg/libtorch")
+set(CMAKE_PREFIX_PATH "/your_path/NextHAM_V1_1_Inference/pkg/libtorch")
 find_package(Torch REQUIRED)
 
 # Find Eigen3
-set(EIGEN3_INCLUDE_DIR "/home/zjdai/software/large_scale_inference/NextHAM_V1_1_Inference/pkg/eigen-3.4.0")
+set(EIGEN3_INCLUDE_DIR "/your_path/NextHAM_V1_1_Inference/pkg/eigen-3.4.0")
 include_directories(${EIGEN3_INCLUDE_DIR})
 
 # Find OpenMP

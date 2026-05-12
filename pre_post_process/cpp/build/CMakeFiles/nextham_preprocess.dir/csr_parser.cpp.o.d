@@ -1,7 +1,7 @@
 CMakeFiles/nextham_preprocess.dir/csr_parser.cpp.o: \
- /home/zjdai/software/large_scale_inference/NextHAM_V1_1_Inference/pre_post_process/cpp/csr_parser.cpp \
+ /your_path/NextHAM_V1_1_Inference/pre_post_process/cpp/csr_parser.cpp \
  /usr/include/stdc-predef.h \
- /home/zjdai/software/large_scale_inference/NextHAM_V1_1_Inference/pre_post_process/cpp/csr_parser.h \
+ /your_path/NextHAM_V1_1_Inference/pre_post_process/cpp/csr_parser.h \
  /usr/include/c++/11/string \
  /usr/include/x86_64-linux-gnu/c++/11/bits/c++config.h \
  /usr/include/x86_64-linux-gnu/c++/11/bits/os_defines.h \

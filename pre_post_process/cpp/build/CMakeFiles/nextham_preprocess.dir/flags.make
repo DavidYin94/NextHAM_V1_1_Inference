@@ -4,7 +4,7 @@
 # compile CXX with /usr/bin/c++
 CXX_DEFINES = -DUSE_C10D_GLOO -DUSE_DISTRIBUTED -DUSE_RPC -DUSE_TENSORPIPE
 
-CXX_INCLUDES = -I/home/zjdai/software/large_scale_inference/NextHAM_V1_1_Inference/pkg/eigen-3.4.0 -isystem /home/zjdai/software/large_scale_inference/NextHAM_V1_1_Inference/pkg/libtorch/include -isystem /home/zjdai/software/large_scale_inference/NextHAM_V1_1_Inference/pkg/libtorch/include/torch/csrc/api/include
+CXX_INCLUDES = -I/your_path/NextHAM_V1_1_Inference/pkg/eigen-3.4.0 -isystem /your_path/NextHAM_V1_1_Inference/pkg/libtorch/include -isystem /your_path/NextHAM_V1_1_Inference/pkg/libtorch/include/torch/csrc/api/include
 
 CXX_FLAGS =  -O3 -march=native -ffast-math -O3 -DNDEBUG -std=gnu++17 -D_GLIBCXX_USE_CXX11_ABI=1 -fopenmp
 
