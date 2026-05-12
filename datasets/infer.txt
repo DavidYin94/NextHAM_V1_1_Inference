@@ -1,1 +1,1 @@
-/home/zjdai/software/large_scale_inference/NextHAM_V1_1_Inference/data/input_inference.pth
+/home/zjdai/software/large_scale_inference/NextHAM_V1_1_Inference/data/cpp_input_inference_si.pth

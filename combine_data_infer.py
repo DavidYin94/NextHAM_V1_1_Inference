@@ -202,7 +202,7 @@ def Process_Material_Dataset(mode, construct_kernel, root='./datasets/', save_pt
     sample_num = 0
     for line in dataset_file_r.readlines():  
         file_path = line.strip()
-        sample = torch.load(file_path, weights_only=True)
+        sample = torch.load(file_path, weights_only=False, map_location='cpu')
         input_data, _ = sample[0], sample[1]
         H0, _, mask_tensor, edge_vec, edge_src, edge_dst, ele_list, output_path = input_data
         node_num = max(int(max(edge_src)+1), int(max(edge_dst)+1))
@@ -227,6 +227,8 @@ def Process_Material_Dataset(mode, construct_kernel, root='./datasets/', save_pt
         H0 = torch.cat(H0_convert_list, dim = 1)
         edge_vec, edge_src, edge_dst = edge_vec.reshape(edge_vec.shape[0], -1), edge_src.reshape(-1), edge_dst.reshape(-1)
         H0_ds = construct_kernel.get_net_out(H0)
+        mask_tensor_raw = mask_tensor_raw.reshape((-1, 27, 2, 27, 2))
+        mask_tensor_raw = mask_tensor_raw.permute(0, 2, 1, 4, 3).reshape((-1, 54, 54))     
         torch.save([file_path, H0_ds, edge_vec, edge_src, edge_dst, ele_list, H0_raw, mask_tensor_raw], file_path)
         sample_num += 1
         dataset_file_w.write(file_path)

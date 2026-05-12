@@ -1,0 +1,7 @@
+{
+	"InstallScripts" : 
+	[
+		"/home/zjdai/software/large_scale_inference/NextHAM_V1_1_Inference/pre_post_process/cpp/build/cmake_install.cmake"
+	],
+	"Parallel" : false
+}

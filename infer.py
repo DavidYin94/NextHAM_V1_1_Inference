@@ -408,10 +408,8 @@ def main(args):
             file_path, H0_ds, edge_vec, edge_src, edge_dst, ele_list, H0_raw, mask_tensor_raw = data
             file_path, H0_ds, edge_vec, edge_src, edge_dst, H0_raw, mask_tensor_raw = file_path[0], H0_ds[0].to(device, non_blocking=True), edge_vec[0].to(device, non_blocking=True), edge_src.to(torch.int64)[0].to(device, non_blocking=True), edge_dst.to(torch.int64)[0].to(device, non_blocking=True), H0_raw[0].to(device, non_blocking=True), mask_tensor_raw[0].to(device, non_blocking=True)      
             node_num = max(int(max(edge_src)+1), int(max(edge_dst)+1))
-
-            mask_tensor_raw = mask_tensor_raw.reshape((-1, 27, 2, 27, 2))
-            mask_tensor_raw = mask_tensor_raw.permute(0, 2, 1, 4, 3).reshape((-1, 54, 54))            
-            # print(visualize_zero(mask_tensor_raw.reshape((-1, 2, 27, 2, 27))[0, 0, :, 0, :]))
+       
+            print(visualize_zero(mask_tensor_raw.reshape((-1, 2, 27, 2, 27))[0, 0, :, 0, :]))
             # import pdb; pdb.set_trace()
 
             batch = torch.ones((node_num,), dtype=torch.int32).to(device, non_blocking=True)
