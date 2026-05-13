@@ -97,7 +97,7 @@ If you are evaluating your own structures, open either `.sh` script and modify t
 TARGET_DIR="${BASE_DIR}/get_hs_res/YOUR_MATERIAL_DIR"
 
 # Modify the Fermi energy for your specific system (crucial for accurate band plotting)
-FERMI_ENERGY="2.1700249049"
+FERMI_ENERGY="6.58"
 ~~~
 
 The output plots and final matrices will be saved in the `res_si_split/plots/` (or your defined `--save-path`) directory.
