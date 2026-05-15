@@ -45,7 +45,7 @@ echo "========================================="
 # Finalize results and generate plots
 python pre_post_process/post_process.py \
     --prediction-path "${BASE_DIR}/data/cpp_input_inference_si_out.pth" \
-    --stru-file "${TARGET_DIR}/STRU" \
+    --stru-file "${DATA_DIR}/STRU" \
     --data-dir "${TARGET_DIR}/OUT.ABACUS" \
     --save-path "res_si_split/plots/" \
     --fermi ${FERMI_ENERGY}
