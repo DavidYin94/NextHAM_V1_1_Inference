@@ -14,7 +14,7 @@ OUTPUT_PTH="${DATA_DIR}/input_inference_si.pth"
 FERMI_ENERGY="6.58"
 
 echo "========================================="
-echo " Step 1: Pre-processing (C++ Engine)"
+echo " Step 1: Pre-processing (Python Engine)"
 echo "========================================="
 cd "${BASE_DIR}/pre_post_process/"
 python pre_process.py \
