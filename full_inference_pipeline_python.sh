@@ -10,7 +10,7 @@ DATASET_DIR="${BASE_DIR}/datasets"
 mkdir -p "${DATA_DIR}"
 mkdir -p "${DATASET_DIR}"
 
-OUTPUT_PTH="${DATA_DIR}/input_inference_si.pth"
+OUTPUT_PTH="${DATA_DIR}/input_inference.pth"
 FERMI_ENERGY="6.58"
 
 echo "========================================="
@@ -26,6 +26,7 @@ echo "========================================="
 echo " Step 2: Combine Data and Run Inference"
 echo "========================================="
 # Combine data and run the inference script
+cd ..
 python combine_data_infer.py
 sh scripts/infer/infer.sh
 
@@ -34,8 +35,8 @@ echo " Step 3: Post-processing"
 echo "========================================="
 # Finalize results and generate plots
 python pre_post_process/post_process.py \
-    --prediction-path "${BASE_DIR}/data/input_inference_si_out.pth" \
-    --stru-file "${DATA_DIR}/STRU" \
+    --prediction-path "${BASE_DIR}/data/input_inference_out.pth" \
+    --stru-file "${BASE_DIR}/data/STRU" \
     --data-dir "${TARGET_DIR}/OUT.ABACUS" \
     --save-path "res_si_split/plots/" \
     --fermi ${FERMI_ENERGY}
