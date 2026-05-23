@@ -33,8 +33,8 @@ sh scripts/infer/infer.sh
 echo "========================================="
 echo " Step 3: Post-processing"
 echo "========================================="
-# Finalize results and generate plots
-python pre_post_process/post_process.py \
+# Finalize results and generate plots (CRITICAL: Must set `mpirun -np 1`!!)
+mpirun -np 1 python pre_post_process/post_process.py \
     --prediction-path "${BASE_DIR}/data/input_inference_out.pth" \
     --stru-file "${BASE_DIR}/data/STRU" \
     --data-dir "${TARGET_DIR}/OUT.ABACUS" \
