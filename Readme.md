@@ -8,40 +8,8 @@ Unlike the [main branch](https://github.com/DavidYin94/NextHAM) (which includes 
 
 ## ⚙️ Environment & Compilation Requirements
 
-### 1. Python Environment
+### Python Environment
 The Python dependencies are identical to the main repository. Please refer to the [NextHAM Main Branch](https://github.com/DavidYin94/NextHAM) for detailed Conda/Pip installation instructions.
-
-### 2. C++ Preprocessor Compilation (Highly Recommended)
-Data parsing and graph generation can be a major bottleneck. To dramatically accelerate this step, we provide a C++ preprocessor. **We highly recommend compiling and using this C++ program for inference**, though a slower, pure-Python alternative is also provided.
-
-**Dependencies:**
-* C++17 compatible compiler (e.g., GCC 7+) and CMake (>= 3.16).
-* **LibTorch** (PyTorch C++ backend, version matching your python env, e.g., v2.2.0, cxx11 ABI).
-* **Eigen3** (C++ template library for linear algebra. Header-only).
-
-**Compilation Guide:**
-
-1. **Download Dependencies**: Download LibTorch and Eigen3 to your local machine and extract them. Note down their absolute paths.
-2. **Modify CMakeLists.txt**: Open `pre_post_process/cpp/CMakeLists.txt` and replace the hardcoded paths with your actual absolute paths:
-   ~~~cmake
-   # Find LibTorch (Update this path!)
-   set(CMAKE_PREFIX_PATH "/your/actual/path/to/libtorch")
-   find_package(Torch REQUIRED)
-
-   # Find Eigen3 (Update this path!)
-   set(EIGEN3_INCLUDE_DIR "/your/actual/path/to/eigen-3.4.0")
-   include_directories(${EIGEN3_INCLUDE_DIR})
-   ~~~
-3. **Build the Executable**:
-   ~~~bash
-   cd pre_post_process/cpp
-   mkdir build && cd build
-   cmake ..
-   make -j4
-   ~~~
-   After a successful build, the `nextham_preprocess` executable will be generated inside the `build/` directory. Return to the project root directory before continuing.
-
----
 
 
 ## 🚀 Quick Start & Usage
@@ -55,27 +23,7 @@ Before running the pipeline, you need to generate the zeroth-step Hamiltonian us
 
 ### 🏃‍♂️ Running the Pipeline
 
-We provide two end-to-end bash scripts to run the pipeline. **We strongly recommend Method 1** as it utilizes the C++ engine for maximum speed. 
-
-#### Method 1: Hybrid Pipeline (Highly Recommended 🌟)
-**Script**: `full_inference_pipeline_hybrid.sh`
-
-This method uses the compiled C++ executable for ultra-fast data parsing, followed by Python for PyTorch inference and post-processing.
-
-~~~bash
-# Ensure you have compiled the C++ executable first!
-sh full_inference_pipeline_hybrid.sh
-~~~
-
-**What this script does:**
-1. Runs the C++ parser (`nextham_preprocess`) to generate the `.pth` graph and manually routes the output path to `datasets/infer_ori.txt`.
-2. Combines the data and runs the Graph Attention Transformer inference (`infer.sh`).
-3. Post-processes the predicted tensors back to ABACUS format, supplements weak labels, and plots the band structure using `post_process.py`.
-
-#### Method 2: Pure Python Pipeline (Alternative 🐢)
 **Script**: `full_inference_pipeline_python.sh`
-
-If you are unable to compile the C++ engine, you can use the pure Python fallback. **Note: This method is significantly slower.**
 
 ~~~bash
 sh full_inference_pipeline_python.sh
