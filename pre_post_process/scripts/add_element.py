@@ -4,10 +4,12 @@ import os
 import re
 import struct
 import glob
+import shutil
 from typing import Optional, Union, List, Tuple, Dict, Any
 from ase.io import read, write
 from scipy.sparse import csc_matrix
 from scipy.sparse import csr_matrix
+from scipy.spatial import cKDTree
 import sys
 from pathlib import Path
 try:
@@ -217,6 +219,7 @@ class add_hs_matrix:
         self.hr1 = hr1
         self.hr2 = hr2
         self.save_path = save_path
+        self.max_dense_gib = float(os.environ.get("NEXTHAM_MAX_DENSE_GIB", "64"))
         self.orb_origin = {'H': 5,   'He': 5,  'Li': 7,  'Be': 7,  'B': 13,  'C': 13,  'N': 13,  'O': 13,  'F': 13, 'Ne': 13, 
                            'Na': 15, 'Mg': 15, 'Al': 13, 'Si': 13, 'P': 13,  'S': 13,  'Cl': 13, 'Ar': 13, 'K': 15, 
                            'Sc': 27, 'V': 27,  'Fe': 27, 'Co': 27, 'Ni': 27, 'Cu': 27, 'Zn': 27, 'Ga': 25, 'Ge': 25, 
@@ -242,66 +245,247 @@ class add_hs_matrix:
             end = current_index + n_orbitals
             index_dict[ii] = [start, end]
             current_index = end  # 更新到下一个原子的起始轨道索引
+        self.basis_num = current_index
         # print('index_dict:', index_dict)
         return index_dict
+
+    def _estimated_dense_gib(self, r_num: int) -> float:
+        bytes_per_value = 16 if self.nspin == 4 else 8
+        total_bytes = r_num * self.basis_num * self.basis_num * bytes_per_value
+        return total_bytes / (1024 ** 3)
+
+    def _copy_predicted_cut_to_total(self):
+        hr_add_file = os.path.join(self.save_path, 'predict_hr_tot')
+        shutil.copyfile(self.hr1, hr_add_file)
+        print(
+            "Step B fallback: system is too large for dense weak-label supplementation. "
+            "Using predict_hr_cut directly as predict_hr_tot.",
+            flush=True,
+        )
+        print(f"Saved fallback Hamiltonian to: {hr_add_file}", flush=True)
+
+    def _detect_binary(self, path: Union[str, Path]) -> bool:
+        with open(path, 'rb') as f:
+            return f.read(4) != b'STEP'
+
+    def _ensure_weak_hr_csr(self) -> str:
+        """Return a weak-label HR CSR path, converting ABACUS block files if needed."""
+        hr2_path = Path(self.hr2)
+        if hr2_path.is_file():
+            return str(hr2_path)
+        if not hr2_path.is_dir():
+            raise FileNotFoundError(f"Weak-label HR path does not exist: {self.hr2}")
+
+        csr_file = hr2_path / 'hrs1_nao.csr'
+        if csr_file.exists():
+            return str(csr_file)
+
+        block_files = sorted(hr2_path.glob('hrs_block_up_*.dat'))
+        if not block_files:
+            raise FileNotFoundError(f"Neither hrs1_nao.csr nor hrs_block_up_*.dat found in {hr2_path}")
+
+        print(f"Converting weak-label ABACUS block files to sparse CSR: {csr_file}", flush=True)
+        try:
+            from convert_block_to_csr import convert
+        except ImportError:
+            sys.path.append(str(Path(__file__).parent))
+            from convert_block_to_csr import convert
+        convert(
+            str(hr2_path),
+            'hrs_block_up',
+            str(csr_file),
+            self.nspin,
+            self._detect_binary(block_files[0]),
+            ref_csr=self.hr1,
+        )
+        return str(csr_file)
+
+    def _read_csr_text_header(self, fh) -> Tuple[int, int]:
+        fh.readline()  # STEP
+        dim = int(fh.readline().split()[-1])
+        r_num = int(fh.readline().split()[-1])
+        return dim, r_num
+
+    def _parse_csr_data_line(self, line: str, nnz: int) -> np.ndarray:
+        if nnz == 0:
+            dtype = np.complex128 if self.nspin == 4 else np.float64
+            return np.empty((0,), dtype=dtype)
+        if self.nspin == 4:
+            values = (
+                complex(float(m.group(1)), float(m.group(2)))
+                for m in re.finditer(r'\(([^,]+),([^)]+)\)', line)
+            )
+            data = np.fromiter(values, dtype=np.complex128, count=nnz)
+        else:
+            data = np.fromstring(line, sep=' ', dtype=np.float64, count=nnz)
+        if data.size != nnz:
+            raise ValueError(f"CSR data length mismatch: expected {nnz}, got {data.size}")
+        return data
+
+    def _iter_csr_text(self, path: Union[str, Path]):
+        """Yield one sparse H(R) matrix at a time from the text CSR format."""
+        with open(path, 'r') as fh:
+            dim, r_num = self._read_csr_text_header(fh)
+            dtype = np.complex128 if self.nspin == 4 else np.float64
+            for _ in range(r_num):
+                header = fh.readline().split()
+                if not header:
+                    break
+                rx, ry, rz = map(int, header[:3])
+                nnz = int(header[3])
+                r_vec = (rx, ry, rz)
+                if nnz == 0:
+                    yield r_vec, csr_matrix((dim, dim), dtype=dtype), dim
+                    continue
+
+                data = self._parse_csr_data_line(fh.readline(), nnz)
+                indices = np.fromstring(fh.readline(), sep=' ', dtype=np.int64, count=nnz)
+                indptr = np.fromstring(fh.readline(), sep=' ', dtype=np.int64, count=dim + 1)
+                if indices.size != nnz:
+                    raise ValueError(f"CSR indices length mismatch for R={r_vec}: expected {nnz}, got {indices.size}")
+                if indptr.size != dim + 1:
+                    raise ValueError(f"CSR indptr length mismatch for R={r_vec}: expected {dim + 1}, got {indptr.size}")
+                matrix = csr_matrix((data, indices, indptr), shape=(dim, dim))
+                yield r_vec, matrix, dim
+
+    def _write_values_line(self, fh, data: np.ndarray, chunk_size: int = 100000):
+        first = True
+        for start in range(0, data.size, chunk_size):
+            chunk = data[start:start + chunk_size]
+            if self.nspin == 4:
+                text = " ".join("({:.8e},{:.8e})".format(v.real, v.imag) for v in chunk)
+            else:
+                text = " ".join("{:.8e}".format(v) for v in chunk)
+            if text:
+                fh.write(text if first else " " + text)
+                first = False
+        fh.write("\n")
+
+    def _write_int_line(self, fh, values: np.ndarray, chunk_size: int = 200000):
+        first = True
+        for start in range(0, values.size, chunk_size):
+            text = " ".join(map(str, values[start:start + chunk_size]))
+            if text:
+                fh.write(text if first else " " + text)
+                first = False
+        fh.write("\n")
+
+    def _write_csr_text_matrix(self, fh, r_vec: Tuple[int, int, int], matrix: csr_matrix):
+        matrix = matrix.tocsr()
+        matrix.sum_duplicates()
+        matrix.eliminate_zeros()
+        fh.write(f"{r_vec[0]} {r_vec[1]} {r_vec[2]} {matrix.nnz}\n")
+        if matrix.nnz == 0:
+            return
+        self._write_values_line(fh, matrix.data)
+        self._write_int_line(fh, matrix.indices)
+        self._write_int_line(fh, matrix.indptr)
+
+    def _query_near_atom_pairs(self, r_vec: Tuple[int, int, int], r_cut: float):
+        positions = self.atoms.positions
+        shift = r_vec[0] * self.atoms.cell[0] + r_vec[1] * self.atoms.cell[1] + r_vec[2] * self.atoms.cell[2]
+        tree_i = cKDTree(positions)
+        tree_j = cKDTree(positions + shift)
+        return tree_i.query_ball_tree(tree_j, r_cut)
+
+    def _block_membership_mask(self, matrix: csr_matrix, index_dict: Dict[int, List[int]], pairs_by_atom) -> np.ndarray:
+        """Mask CSR entries that belong to atom-pair blocks within R_cut."""
+        matrix = matrix.tocsr()
+        mask = np.zeros(matrix.nnz, dtype=bool)
+        for atom_i, atom_js in enumerate(pairs_by_atom):
+            if not atom_js:
+                continue
+            row_start, row_end = index_dict[atom_i]
+            col_ranges = np.array([index_dict[atom_j] for atom_j in atom_js], dtype=np.int64)
+            order = np.argsort(col_ranges[:, 0])
+            col_starts = col_ranges[order, 0]
+            col_ends = col_ranges[order, 1]
+            for row in range(row_start, row_end):
+                start = matrix.indptr[row]
+                end = matrix.indptr[row + 1]
+                if start == end:
+                    continue
+                cols = matrix.indices[start:end]
+                row_mask = np.zeros(cols.size, dtype=bool)
+                for col_start, col_end in zip(col_starts, col_ends):
+                    row_mask |= (cols >= col_start) & (cols < col_end)
+                mask[start:end] = row_mask
+        return mask
+
+    def _apply_nnz_mask(self, matrix: csr_matrix, mask: np.ndarray) -> csr_matrix:
+        matrix = matrix.tocsr()
+        new_indptr = np.empty(matrix.shape[0] + 1, dtype=np.int64)
+        new_indptr[0] = 0
+        for row in range(matrix.shape[0]):
+            new_indptr[row + 1] = new_indptr[row] + int(mask[matrix.indptr[row]:matrix.indptr[row + 1]].sum())
+        return csr_matrix((matrix.data[mask], matrix.indices[mask], new_indptr), shape=matrix.shape)
+
+    def _replace_near_blocks_sparse(
+        self,
+        weak_matrix: csr_matrix,
+        pred_matrix: csr_matrix,
+        r_vec: Tuple[int, int, int],
+        index_dict: Dict[int, List[int]],
+        r_cut: float,
+    ) -> csr_matrix:
+        pairs_by_atom = self._query_near_atom_pairs(r_vec, r_cut)
+        pred_inside_mask = self._block_membership_mask(pred_matrix, index_dict, pairs_by_atom)
+        weak_inside_mask = self._block_membership_mask(weak_matrix, index_dict, pairs_by_atom)
+        weak_far = self._apply_nnz_mask(weak_matrix, ~weak_inside_mask)
+        pred_near = self._apply_nnz_mask(pred_matrix, pred_inside_mask)
+        merged = weak_far + pred_near
+        merged.sum_duplicates()
+        merged.eliminate_zeros()
+        return merged
+
+    def _count_csr_r_vectors(self, path: Union[str, Path]) -> Tuple[int, int]:
+        with open(path, 'r') as fh:
+            return self._read_csr_text_header(fh)
     
     @time_execution
     def add_matrxi_element(self):
         index_dict = self.read_stru()
-        pred_hr = XR_matrix(4, self.hr1)
-        abacus_hr = XR_matrix(4, self.hr2)
-        R_coor1 = pred_hr.R_direct_coor
-        R_coor2 = abacus_hr.R_direct_coor
-        R_num1 = pred_hr.R_num
-        R_num2 = abacus_hr.R_num
-        basis_num = abacus_hr.basis_num
+        weak_csr = self._ensure_weak_hr_csr()
+        basis_num, weak_r_num = self._count_csr_r_vectors(weak_csr)
+        pred_basis_num, pred_r_num = self._count_csr_r_vectors(self.hr1)
+        if basis_num != pred_basis_num:
+            raise ValueError(f"Basis dimension mismatch: weak={basis_num}, predicted={pred_basis_num}")
+        estimated_dense_gib = self._estimated_dense_gib(max(weak_r_num, pred_r_num))
+        print(
+            f"Using sparse dense-completion path. Equivalent dense memory would be "
+            f"{estimated_dense_gib:.1f} GiB, so matrices are processed one R block at a time.",
+            flush=True,
+        )
 
-        add_hr = abacus_hr.XR
-        R_cut = 7
-        tot_num = self.atoms.get_global_number_of_atoms() 
-        for iR2 in range(R_num2):
-            # 判断 R_coor2[iR] 指标是否存在 R_coor1 对应，如果不存在对应，全部用弱标签数据补全
-            for iR1 in range(R_num1):
-                if R_coor2[iR2][0] == R_coor1[iR1][0] and R_coor2[iR2][1] == R_coor1[iR1][1] and R_coor2[iR2][2] == R_coor1[iR1][2]:
-                    for ii in range(tot_num):
-                        for jj in range(tot_num):
-                            posit_ii = self.atoms.positions[ii]
-                            posit_jj = self.atoms.positions[jj]
-                            distance = R_coor2[iR2][0] * self.atoms.cell[0] + R_coor2[iR2][1] * self.atoms.cell[1]  + R_coor2[iR2][2] * self.atoms.cell[2] + posit_jj - posit_ii
-                            if np.linalg.norm(distance) <= R_cut:
-                                add_hr[iR2, index_dict[ii][0]:index_dict[ii][1], index_dict[jj][0]:index_dict[jj][1]] = pred_hr.XR[iR1, index_dict[ii][0]:index_dict[ii][1], index_dict[jj][0]:index_dict[jj][1]]
-    
+        r_cut = 7
+        hr_add_file = os.path.join(self.save_path, 'predict_hr_tot')
+        pred_iter = self._iter_csr_text(self.hr1)
+        current_pred = next(pred_iter, None)
+        completed = 0
+        replaced = 0
 
-        # 文件输出
-        hr_add_file = os.path.join(self.save_path, 'predict_hr_tot')        
-        with open(hr_add_file, 'w' ) as f1 :
-            # 写入文件头信息
-            f1.write('STEP: 0' + '\n')
-            f1.write(f'Matrix Dimension of H(R): {basis_num}' + '\n')
-            f1.write(f'Matrix number of H(R): {R_num2}' + '\n')
+        with open(hr_add_file, 'w') as f1:
+            f1.write('STEP: 0\n')
+            f1.write(f'Matrix Dimension of H(R): {basis_num}\n')
+            f1.write(f'Matrix number of H(R): {weak_r_num}\n')
 
-            for iR in range(R_num2):
-                sparse_data_hr = csr_matrix(add_hr[iR])
-                
-                # 写文件其它内容信息
-                f1.write(f'{R_coor2[iR][0]:.0f} {R_coor2[iR][1]:.0f} {R_coor2[iR][2]:.0f} {len(sparse_data_hr.data)}\n')
-                if len(sparse_data_hr.data) == 0:
-                    pass
+            for weak_r, weak_matrix, _ in self._iter_csr_text(weak_csr):
+                while current_pred is not None and current_pred[0] < weak_r:
+                    current_pred = next(pred_iter, None)
+
+                if current_pred is not None and current_pred[0] == weak_r:
+                    pred_matrix = current_pred[1]
+                    out_matrix = self._replace_near_blocks_sparse(weak_matrix, pred_matrix, weak_r, index_dict, r_cut)
+                    current_pred = next(pred_iter, None)
+                    replaced += 1
                 else:
-                    # 将 data 数组转换为字符串，每个元素之间用空格分隔，并写入一行
-                    if self.nspin == 1:
-                        data_str = " ".join(map(str, sparse_data_hr.data))
-                        f1.write(f"{data_str}\n")
-                    elif self.nspin == 4:
-                        data_str = " ".join("({:.8e},{:.8e})".format(c.real, c.imag) for c in sparse_data_hr.data)
-                        f1.write(f"{data_str}\n")
-                    
-                    # 将 indices 数组转换为字符串，每个元素之间用空格分隔，并写入一行
-                    indices_str = " ".join(map(str, sparse_data_hr.indices))
-                    f1.write(f"{indices_str}\n")
-                    # 将 indptr 数组转换为字符串，每个元素之间用空格分隔，并写入一行
-                    indptr_str = " ".join(map(str, sparse_data_hr.indptr))
-                    f1.write(f"{indptr_str}\n")
+                    out_matrix = weak_matrix
+
+                self._write_csr_text_matrix(f1, weak_r, out_matrix)
+                completed += 1
+                print(f"Step B sparse completion: {completed}/{weak_r_num} R blocks written, replaced={replaced}", flush=True)
+
+        print(f"Sparse dense-completion Hamiltonian saved to: {hr_add_file}", flush=True)
             
 
 def main():
